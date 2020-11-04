@@ -1,0 +1,193 @@
+#include <iostream>
+#include <array>
+#include <iomanip>
+/**
+* Name: Alabbas, Kumai (ADD YOUR NAME HERE)
+* ID: 40175088 (ADD YOUR ID HERE)
+* Assignment 2
+* A code that performs three different operations on two inputed numbers depending on the user choice.
+*/
+using namespace std;
+
+void right();
+void left();
+void display();
+void reboot();
+void showArray(array<int, 10>);
+void cancel();
+void saveOpr();
+void replay();
+
+array<int, 10> nineNumArray;
+int nineNumArrayIdx = 0;
+
+int* oprSaverArray = new int[1]; // can cancel 1000 oprations
+int oprSaverIdx = 0;
+int pointerSize;
+
+/**
+* The main function is to output the control menu and to decide which function to run.
+* The main array is also defined from position 0 to position 1.
+*/
+int main() {
+	int command = 0;
+
+	for (size_t i{ 0 }; i < nineNumArray.size(); i++)
+		nineNumArray[i] = i;
+
+	while (command != 6) {
+		cout << "\nController Menu(input an int number):\n "
+			<< "\n1.Right \n2.Left \n3.Display\n4.Reboot\n5.Show Array\n6.Exit"
+			<< "\n7.Cancel\n8.Replay\n..:";
+		cin >> command;
+
+		switch (command) {
+		case 1:
+			right();
+			saveOpr();
+			break;
+		case 2:
+			left();
+			saveOpr();
+			break;
+		case 3:
+			display();
+			break;
+		case 4:
+			reboot();
+			saveOpr();
+			break;
+		case 5:
+			showArray(nineNumArray);
+			break;
+		case 6:
+			break;
+		case 7:
+			cancel();
+			break;
+		case 8:
+			replay();
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+//This function move the robot to the right based on the user input
+void right() {
+	int shiftNum;
+
+	printf("\nHow many digits you want to shift the robot to the right?: ");
+	cin >> shiftNum;
+
+	if (nineNumArrayIdx + shiftNum < 9)
+		nineNumArrayIdx += shiftNum;
+	else {
+		printf("\nYour input is out of bounds! The difference will be added to the intial position (0).");
+		nineNumArrayIdx = (nineNumArrayIdx + shiftNum) % nineNumArray.size();
+	}
+}
+
+//This function move the robot to the left based on the user input
+void left() {
+	int shiftNum;
+
+	printf("\nHow many digits you want to shift the robot to the left?: ");
+	cin >> shiftNum;
+
+	if (nineNumArrayIdx - shiftNum >= 0)
+		nineNumArrayIdx -= shiftNum;
+	else {
+		printf("\nYour input is out of bounds! The difference will be reduced from the final position (9).");
+		nineNumArrayIdx = 10 - (shiftNum - nineNumArrayIdx) % nineNumArray.size();
+	}
+}
+
+//This function display the position of the robot.
+void display() {
+	printf("\n\nYour robot is now at the position %d.", nineNumArrayIdx);
+
+}
+
+//This function return the robot to its initial position.
+void reboot() {
+	nineNumArrayIdx = 0;
+	printf("\n\nYour robot is succefully rebooted\n");
+}
+
+//This function shows the whole array and it also indicates at which position is the robot.
+void showArray(array<int, 10>) {
+	for (int i = 0; i <= nineNumArray.size() * 6; i++)
+		printf("_");
+
+	for (int i = 0; i < nineNumArray.size(); i++)
+		if (i == 0)
+			cout << "\n|" << setw(3) << nineNumArray[i] << setw(3) << "|";
+		else
+			cout << setw(3) << nineNumArray[i] << setw(3) << "|";
+
+	for (int i = 0; i <= nineNumArray.size() * 6; i++)
+		if (i == 0)
+			printf("\n-");
+		else if (i / 6 == nineNumArrayIdx && i != nineNumArrayIdx * 6)
+			printf("^");
+		else 
+			printf("-");
+}
+
+//This function cancel the last n operations based on the user input.
+void cancel() {
+
+	int oprNum;
+	printf("How many operations you want to cancel?: ");
+	cin >> oprNum;
+
+	if (oprSaverIdx - oprNum > 0) {
+		nineNumArrayIdx = oprSaverArray[oprSaverIdx - oprNum];
+		oprSaverIdx -= oprNum;
+	}
+	else if (oprSaverIdx - oprNum == 0) {
+		nineNumArrayIdx = 0;
+		oprSaverIdx -= oprNum;
+	}
+	else
+		printf("\n\nError ! out of bounds\n");
+
+	pointerSize += oprNum; //This variable is to save the pointer size. 
+}
+
+/**
+* Replay the canceled operations
+*/
+void replay() {
+
+	int oprNum;
+	printf("How many operations you want to replay?: ");
+	cin >> oprNum;
+
+	if (oprNum <= pointerSize) {
+		nineNumArrayIdx = oprSaverArray[oprSaverIdx + oprNum];
+		oprSaverIdx += oprNum;
+	}
+
+	else
+		printf("\n\nError ! out of bounds\n");
+
+	pointerSize -= oprNum;; //This is to prevent replaying greater operations than the canceled ones.
+}
+
+/**
+* It is necessary to use a pointer since we don't know how many operations the user needs to cancel.
+* This function save the position of the robot after each operation
+*/
+void saveOpr() {
+	int* saverArray = new int[++oprSaverIdx];
+
+	for (int i = 0; i <= oprSaverIdx; i++) {
+		saverArray[i] = oprSaverArray[i];
+	}
+
+	oprSaverArray = saverArray;
+	oprSaverArray[oprSaverIdx] = nineNumArrayIdx;
+}
